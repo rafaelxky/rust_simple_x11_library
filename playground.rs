@@ -55,3 +55,6 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
         conn.wait_for_event()?;
     }
 }
+
+// We need state management so we dont need to constantly pass variables such as gc and win 
+// So we need to put that in structs to offer that abstraction
