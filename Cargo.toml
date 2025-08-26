@@ -3,6 +3,10 @@ name = "x11_bar"
 version = "0.1.0"
 edition = "2024"
 
+[[bin]]
+name = "rustx11lib"
+path = "src/Main.rs"
+
 [dependencies]
 x11rb = { version = "0.13.1", features = ["render", "shape"] }
 image = "0.25.6"

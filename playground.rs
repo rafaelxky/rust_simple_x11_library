@@ -2,7 +2,7 @@ use x11rb::connection::Connection;
 use x11rb::protocol::xproto::*;
 use x11rb::rust_connection::RustConnection;
 
-fn main() -> Result<(), Box<dyn std::error::Error>> {
+fn start() -> Result<(), Box<dyn std::error::Error>> {
     // write as Display::open
     // abstract in display struct
     let (conn, screen_num) = RustConnection::connect(None)?;
