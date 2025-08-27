@@ -67,7 +67,7 @@ impl<'a> Window<'a> {
             0,
             // here is were we configure the win man controll (1 doesnt controll, remove override_redirect for controll)
             &CreateWindowAux::new().override_redirect(1)
-                .background_pixel(x11rb::NONE),
+                .background_pixel(self.screen.black_pixel),
         )?;
 
         // Map (make visible)
@@ -91,12 +91,14 @@ impl<'a> Window<'a> {
         &self,
         (x, y): (i16, i16),
         (width, height): (u16, u16),
-        color: Color,
+        red: u8, green: u8, blue: u8
     ) -> Result<(), Box<dyn std::error::Error>> {
+        let color = self.alloc_rgb_pixel(red, green, blue)?;
+
         let gc = self.gc.expect("Window not shown (GC not created)");
 
         // FIXME: map your `Color` enum to an X11 pixel here
-        self.conn.change_gc(gc, &ChangeGCAux::new().foreground(self.screen.white_pixel))?;
+        self.conn.change_gc(gc, &ChangeGCAux::new().foreground(color))?;
 
         self.conn.poly_fill_rectangle(
             self.win_id,
@@ -112,4 +114,13 @@ impl<'a> Window<'a> {
         self.conn.flush()?;
         Ok(())
     }
+
+    fn alloc_rgb_pixel(&self, r: u8, g: u8, b: u8) -> Result<u32, Box<dyn std::error::Error>> {
+        let r = (r as u16) << 8;
+        let g = (g as u16) << 8;
+        let b = (b as u16) << 8;
+        Ok(self.conn.alloc_color(self.screen.default_colormap, r, g, b)?.reply()?.pixel)
+    }
 }
+
+

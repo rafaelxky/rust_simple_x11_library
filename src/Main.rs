@@ -1,28 +1,77 @@
+mod color;
 mod display;
 mod window;
-mod color;
+use crate::color::*;
 use crate::display::*;
 use crate::window::*;
-use crate::color::*;
+use mlua::{Lua, Result};
+use notify::{RecommendedWatcher, RecursiveMode, Watcher};
+use std::path::Path;
+use std::sync::mpsc::channel;
+use std::{fs, thread, time::Duration};
 
-fn main() -> Result<(), Box<dyn std::error::Error>>{
-    let display = Display::open()?;
-    let var_file_path = "vars.txt"; 
+fn main() {
+    let lua = Lua::new();
+    let script_path = "script.lua";
+    load_lua_script(&lua, script_path).unwrap();
 
-    let window = display.create_window()
-        .size(display.winWidth(),100)
+    let (tx, rx) = channel();
+    let mut watcher: RecommendedWatcher =
+        RecommendedWatcher::new(tx, notify::Config::default()).unwrap();
+    watcher
+        .watch(Path::new(script_path), RecursiveMode::NonRecursive)
+        .unwrap();
+
+    let display = Display::open().unwrap();
+    let var_file_path = "vars.txt";
+
+    let window = display
+        .create_window()
+        .size(display.win_width(), 100)
         .title("My Rust X11 Window")
-        .background(Color::White)
-        .show()?;  
+        .background(Color::Black)
+        .show()
+        .unwrap();
 
-        // this bariable should be set from an external file 
     //window.draw_line((50, 50), (200, 200), Color::Red)?;
-    window.draw_rect((100, 37), (100, 25), Color::Blue)?;
-    window.draw_rect((300, 37), (100, 25), Color::Blue)?;
     //window.draw_text((150, 150), "Hello, X11!", Color::Black)?;
 
-    loop {
-        
+    loop { 
+        window
+        .draw_rect((0, 0), (display.win_width(), 100), 0, 0, 255)
+        .unwrap();
+
+        while let Ok(res) = rx.try_recv() {
+            if let Ok(event) = res {
+                match event.kind {
+                    notify::EventKind::Modify(_) | notify::EventKind::Create(_) => {
+                        println!("Lua file changed, reloading...");
+                        if let Err(e) = load_lua_script(&lua, script_path) {
+                            eprintln!("Failed to reload Lua: {:?}", e);
+                        }
+                    }
+                    _ => {}
+                }
+            } else {
+                // Optional: handle notify::Error
+                eprintln!("Watcher error: {:?}", res.err());
+            }
+        }
+
+        let x1: i16 = lua.globals().get("x1").unwrap_or(100);
+        let y1: i16 = lua.globals().get("y1").unwrap_or(100);
+        let x2: i16 = lua.globals().get("x1").unwrap_or(100);
+        let y2: i16 = lua.globals().get("y1").unwrap_or(100);
+
+        window.draw_rect((x1, y1), (100, 25), 255,0,0).unwrap();
+        window.draw_rect((x2, y2), (100, 25), 255,0,0).unwrap();
+
+        thread::sleep(Duration::from_millis(500));
     }
-    return Ok(())
+}
+
+fn load_lua_script(lua: &Lua, path: &str) -> Result<()> {
+    let content = fs::read_to_string(path)?;
+    lua.load(&content).exec()?;
+    Ok(())
 }

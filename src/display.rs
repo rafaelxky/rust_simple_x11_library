@@ -22,11 +22,11 @@ impl Display {
         Window::default(&self.conn, self.screen.clone())
     }
 
-    pub fn winHeight(&self) -> u16{
+    pub fn win_height(&self) -> u16{
         return self.screen.height_in_pixels;
     }
 
-    pub fn winWidth(&self) -> u16{
+    pub fn win_width(&self) -> u16{
         return self.screen.width_in_pixels;
     }
 }
