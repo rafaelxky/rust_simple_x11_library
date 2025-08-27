@@ -7,16 +7,18 @@ use crate::color::*;
 
 fn main() -> Result<(), Box<dyn std::error::Error>>{
     let display = Display::open()?;
+    let var_file_path = "vars.txt"; 
 
     let window = display.create_window()
-        .size(800, 600)
+        .size(display.winWidth(),100)
         .title("My Rust X11 Window")
         .background(Color::White)
-        .show()?;  // Automatically maps the window
+        .show()?;  
 
+        // this bariable should be set from an external file 
     //window.draw_line((50, 50), (200, 200), Color::Red)?;
-    window.draw_rect((100, 100), (100, 100), Color::Blue)?;
-    window.draw_rect((300, 100), (100, 100), Color::Blue)?;
+    window.draw_rect((100, 37), (100, 25), Color::Blue)?;
+    window.draw_rect((300, 37), (100, 25), Color::Blue)?;
     //window.draw_text((150, 150), "Hello, X11!", Color::Black)?;
 
     loop {
