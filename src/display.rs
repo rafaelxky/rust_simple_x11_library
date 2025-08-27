@@ -1,14 +1,24 @@
-// Display connection handling
 use x11rb::rust_connection::RustConnection;
-use std::{f32::consts::E, fmt::Error};
+use x11rb::connection::Connection;
+use x11rb::protocol::xproto::Screen;
+use crate::window::Window;
+use std::error::Error;
 
-pub struct Display{
+pub struct Display {
     conn: RustConnection,
     screen_num: usize,
+    screen_root: Screen,
 }
+
 impl Display {
-    pub fn open() -> Result<Self, Box<dyn std::error::Error>>{
+    pub fn open() -> Result<Self, Box<dyn Error>> {
         let (conn, screen_num) = RustConnection::connect(None)?;
-        Ok(Self {conn, screen_num})
+        let screen = conn.setup().roots[screen_num].clone();
+
+        Ok(Self { conn, screen_num, screen_root: screen })
+    }
+
+    pub fn create_window(&self) -> Window {
+        Window::default(&self.conn, self.screen_root.clone())
     }
 }
