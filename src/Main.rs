@@ -23,7 +23,6 @@ fn main() {
         .unwrap();
 
     let display = Display::open().unwrap();
-    let var_file_path = "vars.txt";
 
     let window = display
         .create_window()
@@ -62,9 +61,12 @@ fn main() {
         let y1: i16 = lua.globals().get("y1").unwrap_or(100);
         let x2: i16 = lua.globals().get("x1").unwrap_or(100);
         let y2: i16 = lua.globals().get("y1").unwrap_or(100);
+        let red: u8 = lua.globals().get("red").unwrap_or(100);
+        let green: u8 = lua.globals().get("green").unwrap_or(100);
+        let blue: u8 = lua.globals().get("blue").unwrap_or(100);
 
-        window.draw_rect((x1, y1), (100, 25), 255,0,0).unwrap();
-        window.draw_rect((x2, y2), (100, 25), 255,0,0).unwrap();
+        window.draw_rect((x1, y1), (100, 25), red,green,blue).unwrap();
+        window.draw_rect((x2, y2), (100, 25),red,green,blue).unwrap();
 
         thread::sleep(Duration::from_millis(500));
     }
