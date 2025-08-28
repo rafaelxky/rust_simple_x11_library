@@ -6,7 +6,8 @@ red = 255
 green = 255
 blue = 100
 delay = 10
-text = "THis is a really biiiiiiiiiiiiiiiiiiig text omg"
+text = "Welcome"
+font = "10x20"
 
 function update()
     x1 = x1 + 2

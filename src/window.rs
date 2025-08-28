@@ -17,7 +17,6 @@ pub struct Window<'a> {
     win_id: u32,
     screen: Screen,
     gc: Option<u32>,
-    font_id: Option<u32>,
 }
 
 impl<'a> Window<'a> {
@@ -31,7 +30,6 @@ impl<'a> Window<'a> {
             win_id: conn.generate_id().expect("Failed to generate window id"),
             screen,
             gc: None,
-            font_id: None,
         }
     }
 
@@ -88,7 +86,6 @@ impl<'a> Window<'a> {
         self.gc = Some(gc);
 
         let font_id = self.conn.generate_id()?;
-        self.font_id = Some(font_id);
         self.conn.open_font(font_id, b"fixed")?;
         self.conn.change_gc(gc, &ChangeGCAux::new().font(font_id))?;
 
@@ -157,9 +154,9 @@ impl<'a> Window<'a> {
     }
 
     pub fn change_font(&self, font: &str) -> Result<(), Box<dyn std::error::Error>> {
-        let gc = self.gc.ok_or("GC not initialized")?;
-        self.conn.open_font(self.font_id.unwrap(), font.as_bytes())?;
-        self.conn.change_gc(gc, &ChangeGCAux::new().font(self.font_id.unwrap()))?;
+        let font_id = self.conn.generate_id()?;
+        self.conn.open_font(font_id, font.as_bytes())?;
+        self.conn.change_gc(self.gc.unwrap(), &ChangeGCAux::new().font(font_id))?;
 
         Ok(())
     }

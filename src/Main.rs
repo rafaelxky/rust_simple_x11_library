@@ -36,11 +36,15 @@ fn main() {
     //window.draw_line((50, 50), (200, 200), Color::Red)?;
     //window.draw_text((150, 150), "Hello, X11!", Color::Black)?;
 
+    window.change_font("12x24").unwrap();
+    //window.change_font("6x13").unwrap();
+
     loop { 
         while let Ok(res) = rx.try_recv() {
             if let Ok(event) = res {
                 match event.kind {
                     notify::EventKind::Modify(_) | notify::EventKind::Create(_) => {
+                        println!("Lua file changed, reloading...");
                         if let Err(e) = load_lua_script(&lua, script_path) {
                             eprintln!("Failed to reload Lua: {:?}", e);
                         }
@@ -61,7 +65,7 @@ fn main() {
         let green: u8 = lua.globals().get("green").unwrap_or(100);
         let blue: u8 = lua.globals().get("blue").unwrap_or(100);
         let delay: u64 = lua.globals().get("delay").unwrap_or(500);
-        let text: String = lua.globals().get("text").unwrap_or(String::from_str("Err").unwrap());
+        let text: String = lua.globals().get("text").unwrap_or(String::from("Err"));
 
         if let Ok(update) = lua.globals().get::<_, mlua::Function>("update") {
             let _ = update.call::<_, ()>(());
@@ -72,6 +76,8 @@ fn main() {
         .unwrap();
         window.draw_rect((x1, y1), (100, 25), red,green,blue).unwrap();
         window.draw_rect((x2, y2), (100, 25),red,green,blue).unwrap();
+
+        window.draw_text((100, 50), &text, 255, 255, 255).unwrap();
         window.draw_text((30, 80), &text, 255, 255, 255).unwrap();
 
         thread::sleep(Duration::from_millis(delay));
