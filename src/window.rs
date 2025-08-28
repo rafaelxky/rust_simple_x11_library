@@ -3,7 +3,7 @@ use std::str::FromStr;
 use x11rb::{
     connection::Connection,
     protocol::xproto::{
-        ChangeGCAux, ConnectionExt, CreateGCAux, CreateWindowAux,Rectangle, Screen, WindowClass
+        ChangeGCAux, ConnectionExt, CreateGCAux, CreateWindowAux, Rectangle, Screen, WindowClass,
     },
     rust_connection::RustConnection,
 };
@@ -66,7 +66,8 @@ impl<'a> Window<'a> {
             WindowClass::INPUT_OUTPUT,
             0,
             // here is were we configure the win man controll (1 doesnt controll, remove override_redirect for controll)
-            &CreateWindowAux::new().override_redirect(1)
+            &CreateWindowAux::new()
+                .override_redirect(1)
                 .background_pixel(self.screen.black_pixel),
         )?;
 
@@ -84,6 +85,10 @@ impl<'a> Window<'a> {
 
         self.gc = Some(gc);
 
+        let font_id = self.conn.generate_id()?;
+        self.conn.open_font(font_id, b"fixed")?;
+        self.conn.change_gc(gc, &ChangeGCAux::new().font(font_id))?;
+
         Ok(self)
     }
 
@@ -91,14 +96,17 @@ impl<'a> Window<'a> {
         &self,
         (x, y): (i16, i16),
         (width, height): (u16, u16),
-        red: u8, green: u8, blue: u8
+        red: u8,
+        green: u8,
+        blue: u8,
     ) -> Result<(), Box<dyn std::error::Error>> {
         let color = self.alloc_rgb_pixel(red, green, blue)?;
 
         let gc = self.gc.expect("Window not shown (GC not created)");
 
         // FIXME: map your `Color` enum to an X11 pixel here
-        self.conn.change_gc(gc, &ChangeGCAux::new().foreground(color))?;
+        self.conn
+            .change_gc(gc, &ChangeGCAux::new().foreground(color))?;
 
         self.conn.poly_fill_rectangle(
             self.win_id,
@@ -119,8 +127,29 @@ impl<'a> Window<'a> {
         let r = (r as u16) << 8;
         let g = (g as u16) << 8;
         let b = (b as u16) << 8;
-        Ok(self.conn.alloc_color(self.screen.default_colormap, r, g, b)?.reply()?.pixel)
+        Ok(self
+            .conn
+            .alloc_color(self.screen.default_colormap, r, g, b)?
+            .reply()?
+            .pixel)
+    }
+
+    pub fn draw_text(
+        &self,
+        (x, y): (i16, i16),
+        text: &str,
+        red: u8,
+        green: u8,
+        blue: u8,
+    ) -> Result<(), Box<dyn std::error::Error>> {
+        let color = self.alloc_rgb_pixel(red, green, blue)?;
+        let gc = self.gc.expect("Window not shown (GC not created)");
+
+        self.conn
+            .change_gc(gc, &ChangeGCAux::new().foreground(color))?;
+        self.conn
+            .image_text8(self.win_id, gc, x, y, text.as_bytes())?;
+        self.conn.flush()?;
+        Ok(())
     }
 }
-
-

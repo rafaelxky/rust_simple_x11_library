@@ -36,10 +36,6 @@ fn main() {
     //window.draw_text((150, 150), "Hello, X11!", Color::Black)?;
 
     loop { 
-        window
-        .draw_rect((0, 0), (display.win_width(), 100), 0, 0, 255)
-        .unwrap();
-
         while let Ok(res) = rx.try_recv() {
             if let Ok(event) = res {
                 match event.kind {
@@ -68,9 +64,13 @@ fn main() {
         if let Ok(update) = lua.globals().get::<_, mlua::Function>("update") {
             let _ = update.call::<_, ()>(());
         }
-
+        
+        window
+        .draw_rect((0, 0), (display.win_width(), 100), 0, 0, 255)
+        .unwrap();
         window.draw_rect((x1, y1), (100, 25), red,green,blue).unwrap();
         window.draw_rect((x2, y2), (100, 25),red,green,blue).unwrap();
+        window.draw_text((30, 80), "Hello, X11!", 255, 255, 255).unwrap();
 
         thread::sleep(Duration::from_millis(delay));
     }
