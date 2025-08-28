@@ -57,8 +57,6 @@ fn main() {
             }
         }
 
-        let x1: i16 = lua.globals().get("x1").unwrap_or(100);
-        let y1: i16 = lua.globals().get("y1").unwrap_or(100);
         let x2: i16 = lua.globals().get("x2").unwrap_or(100);
         let y2: i16 = lua.globals().get("y3").unwrap_or(100);
         let red: u8 = lua.globals().get("red").unwrap_or(100);
@@ -74,7 +72,7 @@ fn main() {
         window
         .draw_rect((0, 0), (display.win_width(), 100), 0, 0, 255)
         .unwrap();
-        window.draw_rect((x1, y1), (100, 25), red,green,blue).unwrap();
+        window.draw_rect(((display.win_width() / 2) as i16, 25), (50, 25), red,green,blue).unwrap();
         window.draw_rect((x2, y2), (100, 25),red,green,blue).unwrap();
 
         window.draw_text((100, 50), &text, 255, 255, 255).unwrap();
