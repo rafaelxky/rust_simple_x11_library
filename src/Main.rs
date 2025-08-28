@@ -44,7 +44,6 @@ fn main() {
             if let Ok(event) = res {
                 match event.kind {
                     notify::EventKind::Modify(_) | notify::EventKind::Create(_) => {
-                        println!("Lua file changed, reloading...");
                         if let Err(e) = load_lua_script(&lua, script_path) {
                             eprintln!("Failed to reload Lua: {:?}", e);
                         }
@@ -59,16 +58,21 @@ fn main() {
 
         let x1: i16 = lua.globals().get("x1").unwrap_or(100);
         let y1: i16 = lua.globals().get("y1").unwrap_or(100);
-        let x2: i16 = lua.globals().get("x1").unwrap_or(100);
-        let y2: i16 = lua.globals().get("y1").unwrap_or(100);
+        let x2: i16 = lua.globals().get("x2").unwrap_or(100);
+        let y2: i16 = lua.globals().get("y3").unwrap_or(100);
         let red: u8 = lua.globals().get("red").unwrap_or(100);
         let green: u8 = lua.globals().get("green").unwrap_or(100);
         let blue: u8 = lua.globals().get("blue").unwrap_or(100);
+        let delay: u64 = lua.globals().get("delay").unwrap_or(500);
+
+        if let Ok(update) = lua.globals().get::<_, mlua::Function>("update") {
+            let _ = update.call::<_, ()>(());
+        }
 
         window.draw_rect((x1, y1), (100, 25), red,green,blue).unwrap();
         window.draw_rect((x2, y2), (100, 25),red,green,blue).unwrap();
 
-        thread::sleep(Duration::from_millis(500));
+        thread::sleep(Duration::from_millis(delay));
     }
 }
 
