@@ -40,7 +40,7 @@ impl<'a> Window<'a> {
     }
 
     pub fn title(mut self, title: &str) -> Self {
-        self.title = Some(String::from_str(title).unwrap());
+        self.title = Some(String::from(title));
         self
     }
 
