@@ -12,6 +12,7 @@ use std::sync::mpsc::channel;
 use std::{fs, thread, time::Duration};
 
 fn main() {
+    println!("Starting");
     let lua = Lua::new();
     let script_path = "script.lua";
     load_lua_script(&lua, script_path).unwrap();
@@ -29,7 +30,7 @@ fn main() {
         .create_window()
         .size(display.win_width(), 100)
         .title("My Rust X11 Window")
-        .background(Color::Black)
+        //.background(Color::Black)
         .show()
         .unwrap();
 

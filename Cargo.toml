@@ -13,3 +13,4 @@ image = "0.25.6"
 x11rb-protocol = "0.13.1"
 mlua = { version = "0.9", features = ["lua54"] }
 notify = "8.2.0"
+palette = "0.7"
